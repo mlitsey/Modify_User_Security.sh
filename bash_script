@@ -1,0 +1,43 @@
+#!/bin/bash
+
+## Epic Security Modification Script
+##
+## Script modifies users from all Servers in the /epic/scripts/epic_envs file and all environments on the server based on the usernames in the /epic/scripts/useradm/modifyUser file
+##  it may only modify the exact case of the usernames so you should run it lowercase first then do a "for user in `cat /etc/passwd` ; do grep $user ; done" on a list of uppercase
+##  usernames to ensure you have modified both variations on username
+## Rev 1 : 05/28/2016 : michael.litsey@gmail.com : Created
+
+
+
+EPIC_ENVS=`cat /epic/scripts/epic_envs | awk '{print $2}'`
+EPIC_HOSTS=`cat /epic/scripts/epic_envs | awk '{print $1}' | awk '{ if (a[$1]++ == 0) print $0; }' "$@"`
+
+printf "\n Starting Modify_Epic_Security.sh script\n"
+
+printf "\n Modifying Epic Security Acess for user $user \n"
+
+for host in $EPIC_HOSTS; do
+	for user in `cat /epic/scripts/useradm/modifyUser`; do
+	# cat/etc/passwd |grep $user
+	#if $user = false 
+	#then make upper case | cat/etc/passwd $USER
+		#echo "Removing account $user $name on $host"
+			#ssh root@$host userdel -r $user ; wait
+			#for dir in `ssh root@$host ccontrol qlist | grep running | awk -F'^' '{ print $2 }' | sed -e 's/cachesys/bin/g'`; do
+				#ssh root@$host $dir/cusers --users $user --del
+				#echo " $user Account removed"
+				#done
+	#else
+	echo "Modifying Epic Security on account $user $name on $host"
+	ssh root@$host cat /etc/passwd | grep $user ; wait
+		for dir in `ssh root@$host ccontrol qlist | grep running | awk -F'^' '{ print $2 }' | sed -e 's/cachesys/bin/g'`; do
+			ssh root@$host $dir/cusers --users $user --modify --roles %DB_EPICLIM
+			echo " $user Account modified\n"
+		done
+	done
+done
+
+echo "\n All User Accounts Modified \n"
+
+
+exit 0
